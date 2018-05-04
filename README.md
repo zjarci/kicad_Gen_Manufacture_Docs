@@ -1,20 +1,28 @@
-#KiCADÉú²úÎÄ¼şÉú³ÉÆ÷
-Ê¹ÓÃ·½·¨:
-1 ¸´ÖÆmf_tool.pyµ½"[KiCad°²×°Ä¿Â¼]\share\kicad\scripting\plugins" Â·¾¶ÏÂ
-2 ÔÚKiCADµÄPythonÃüÁîĞĞ´°¿ÚÖĞ¼üÈëÏÂÁĞÃüÁî
+#KiCADç”Ÿäº§æ–‡ä»¶ç”Ÿæˆå™¨
+
+ä½¿ç”¨æ–¹æ³•:
+
+1 å¤åˆ¶mf_tool.pyåˆ°"[KiCadå®‰è£…ç›®å½•]\share\kicad\scripting\plugins" è·¯å¾„ä¸‹
+
+2 åœ¨KiCADçš„Pythonå‘½ä»¤è¡Œçª—å£ä¸­é”®å…¥ä¸‹åˆ—å‘½ä»¤
 ```python
 import mf_tool as mf
 mf.GenMFDoc()
 ```
-3 BOMÎÄ¼şºÍÎ»ÖÃÎÄ¼ş»áÒÔCSV¸ñÊ½´æ·ÅÔÚµçÂ·°åÏàÍ¬Ä¿Â¼ÏÂ
-##×¢Òâ:
-GenMFDoc() »á¸Ä±äµçÂ·°åµÄ×ê¿×Ô­µã¡£½¨ÒéÏÈÓÃGenMFDoc()Éú³ÉBOMÎÄ¼şºÍÎ»ÖÃÎÄ¼ş£¬ÔÙÉú³ÉGerberÎÄ¼ş¡£
-Éú³ÉµÄBOMÎÄ¼şºÍ×ø±êÎÄ¼ş¿ÉÒÔÖ±½ÓÔÚsz-jlc.com½øĞĞÌù×°
+3 BOMæ–‡ä»¶å’Œä½ç½®æ–‡ä»¶ä¼šä»¥CSVæ ¼å¼å­˜æ”¾åœ¨ç”µè·¯æ¿ç›¸åŒç›®å½•ä¸‹
+
+##æ³¨æ„:
+
+GenMFDoc() ä¼šæ”¹å˜ç”µè·¯æ¿çš„é’»å­”åŸç‚¹ã€‚å»ºè®®å…ˆç”¨GenMFDoc()ç”ŸæˆBOMæ–‡ä»¶å’Œä½ç½®æ–‡ä»¶ï¼Œå†ç”ŸæˆGerberæ–‡ä»¶ã€‚
+ç”Ÿæˆçš„BOMæ–‡ä»¶å’Œåæ ‡æ–‡ä»¶å¯ä»¥ç›´æ¥åœ¨sz-jlc.comè¿›è¡Œè´´è£…
 
 
 # Manufacture Tools for kicad
+
 Usage:
-step 1: Copy the mf_tool.py to ¡°[kicad install path]\share\kicad\scripting\plugins¡±
+
+step 1: Copy the mf_tool.py to â€œ[kicad install path]\share\kicad\scripting\pluginsâ€
+
 step 2: In Python console window, type 
 ```python
 import mf_tool as mf
@@ -23,4 +31,5 @@ mf.GenMFDoc()
 step 3: the BOM and Postion CSV file will be generated under the same folder of the board file
 
 ##Attention:
+
 The GenMFDoc() command will change the Aux original point
