@@ -26,7 +26,7 @@ def MakeRefs(refs):
         if ps != -1:
             start_s = ts[:ps]
             end_s = ts[ps+1:]
-            if (not start_s.isdigit()) or (not start_s.isdigit()):
+            if (not start_s.isdigit()) or (not end_s.isdigit()):
                 print 'Ref not Digital value'
             else:
                 for i in range(int(start_s), int(end_s)+1):
