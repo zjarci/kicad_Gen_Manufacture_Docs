@@ -586,13 +586,35 @@ def GenMFDoc(SplitTopAndBottom = False, ExcludeRef = [], ExcludeValue = [], brd 
 
 def version():
     print "1.1"
+
     
-    
-    
-    
-    
-    
-    
+class gen_mf_doc( pcbnew.ActionPlugin ):
+    """
+    gen_mf_doc: A plugin used to generate BOM and position file
+    How to use:
+    - just call the plugin
+    - the BOM and Position file will generate under the PCB file folder
+      BOM file name is <pcb file name>_BOM.csv
+      Position file name is <pcb file name>_POS.csv
+    """
+
+    def defaults( self ):
+        """
+        Method defaults must be redefined
+        self.name should be the menu label to use
+        self.category should be the category (not yet used)
+        self.description should be a comprehensive description
+          of the plugin
+        """
+        self.name = "Gen Manufacture Doc"
+        self.category = "Modify PCB"
+        self.description = "Automatically generate manufacture document"
+
+    def Run( self ):
+        GenMFDoc()
+
+
+gen_mf_doc().register()
     
     
     
