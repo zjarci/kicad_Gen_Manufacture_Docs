@@ -110,17 +110,17 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/"):
 	drlwriter.SetFormat( metricFmt )
 
 	genDrl = True
-	genMap = True
+	genMap = False
 	print 'create drill and map files in %s' % pctl.GetPlotDirName()
 	drlwriter.CreateDrillandMapFilesSet( pctl.GetPlotDirName(), genDrl, genMap );
 
 	# One can create a text file to report drill statistics
-	rptfn = pctl.GetPlotDirName() + 'drill_report.rpt'
-	print 'report: %s' % rptfn
-	drlwriter.GenDrillReportFile( rptfn );
+	#rptfn = pctl.GetPlotDirName() + 'drill_report.rpt'
+	#print 'report: %s' % rptfn
+	#drlwriter.GenDrillReportFile( rptfn );
 	
 	if split_G85:
-		SplitG85InDrill(pctl.GetPlotDirName(), True, split_G85)
+		SplitG85InDrill(pctl.GetPlotDirName(), False, split_G85)
 	return pctl.GetPlotDirName()
 
 def FromGerberPosition(position_str):
