@@ -590,6 +590,9 @@ def GenMFDoc(SplitTopAndBottom = False, ExcludeRef = [], ExcludeValue = [], brd 
 def version():
     print "1.1"
 
+def GenSMTFiles():
+    GenMFDoc()
+    gd.GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "gerber/")
     
 class gen_mf_doc( pcbnew.ActionPlugin ):
     """
@@ -599,6 +602,7 @@ class gen_mf_doc( pcbnew.ActionPlugin ):
     - the BOM and Position file will generate under the PCB file folder
       BOM file name is <pcb file name>_BOM.csv
       Position file name is <pcb file name>_POS.csv
+    - the Gerber and drill file will generate under gerber folder
     """
 
     def defaults( self ):
@@ -609,9 +613,9 @@ class gen_mf_doc( pcbnew.ActionPlugin ):
         self.description should be a comprehensive description
           of the plugin
         """
-        self.name = "Gen Manufacture Doc"
-        self.category = "Modify PCB"
-        self.description = "Automatically generate manufacture document"
+        self.name = "Gen Manufacture Docs"
+        #self.category = "Modify PCB"
+        self.description = "Automatically generate manufacture document, Gerber, Drill, BOM, Position"
 
     def Run( self ):
         bomName, posName = GenMFDoc()
