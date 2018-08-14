@@ -5,6 +5,8 @@ import csv
 import re
 import sys
 import os
+import gerber_drill as gd
+import wx
 
 class RefBuilder:
     ''' RefBuilder use to re-build the module referrence number
@@ -583,7 +585,8 @@ def GenMFDoc(SplitTopAndBottom = False, ExcludeRef = [], ExcludeValue = [], brd 
                
             for v in posHoleBot:
                v.Output(csv)
-
+    return bomName, posName
+    
 def version():
     print "1.1"
 
@@ -611,7 +614,13 @@ class gen_mf_doc( pcbnew.ActionPlugin ):
         self.description = "Automatically generate manufacture document"
 
     def Run( self ):
-        GenMFDoc()
+        bomName, posName = GenMFDoc()
+        gerberPath = gd.GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "gerber/")
+        msg = 'BOM file is "%s"\n' % bomName
+        msg = msg + 'Position file is "%s"\n' % posName
+        msg = msg + 'Gerber file dir is "%s"' % gerberPath
+        wx.MessageBox(msg)
+        
 
 
 gen_mf_doc().register()

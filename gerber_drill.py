@@ -121,6 +121,7 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/"):
 	
 	if split_G85:
 		SplitG85InDrill(pctl.GetPlotDirName(), True, split_G85)
+	return pctl.GetPlotDirName()
 
 def FromGerberPosition(position_str):
 	s1 = position_str.find('X')
