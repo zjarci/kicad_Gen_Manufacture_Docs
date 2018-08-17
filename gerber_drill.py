@@ -45,7 +45,7 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/"):
 	popt.SetMirror(False)
 	popt.SetUseGerberAttributes(True)
 	popt.SetUseGerberProtelExtensions(False)
-	popt.SetExcludeEdgeLayer(False);
+	popt.SetExcludeEdgeLayer(True);
 	popt.SetScale(1)
 	popt.SetUseAuxOrigin(False)
 
