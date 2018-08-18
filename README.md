@@ -9,7 +9,7 @@
 
 ```python
 import mf_tool as mf
-mf.GenMFDoc()
+mf.GenSMTFiles()
 ```
 
 3. 或者在[工具]->[外部工具]下执行Gen Manufacture Docs命令。
@@ -32,7 +32,7 @@ step 1: Copy the mf_tool.py and gerber_drill.py to “[kicad install path]\share
 step 2: In Python console window, type 
 ```python
 import mf_tool as mf
-mf.GenMFDoc()
+mf.GenSMTFiles()
 ```
 
 step 3: or in [tools]->[external tools] menu, invoke the [Gen Manufacture Docs] command.
