@@ -1,6 +1,11 @@
 
 # KiCAD生产文件生成器
 
+KiCad plot tool is forked from "https://github.com/blairbonnett-mirrors/kicad/blob/master/demos/python_scripts_examples/gen_gerber_and_drill_files_board.py"
+
+S-Expression parse tool is forked from https://github.com/tkf/sexpdata
+
+
 使用方法:
 
 1 复制mf_tool.py和gerber_drill.py到"[KiCad安装目录]\share\kicad\scripting\plugins" 路径下
