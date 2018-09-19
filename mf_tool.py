@@ -7,6 +7,7 @@ import sys
 import os
 import gerber_drill as gd
 import wx
+import loadnet
 
 class RefBuilder:
     ''' RefBuilder use to re-build the module referrence number
@@ -303,25 +304,49 @@ def footPrintName(mod):
     return f
 
 class BOMItem:
-    def __init__(self, ref, footprint, value, pincount):
+    def __init__(self, ref, footprint, value, pincount, netList = None):
         self.refs = [ref]
         self.fp = footprint
         self.value = value
         self.pincount = pincount
+        kv = value
+        if kv.rfind('[') != -1:
+            kv = kv[0:kv.rfind('[')]
+        
+        self.netKey = kv + "&" + footprint
+        self.partNumber = ""
+        self.desc = "desc"
+        self.url = ""
+        self.libRef = "libref"
+        if netList:
+            if netList.has_key(self.netKey):
+                comp = netList[self.netKey]
+                if comp.has_key('partNumber'):
+                    self.partNumber = comp['partNumber']
+                if comp.has_key('description'):
+                    self.desc = comp['description']
+                if comp.has_key('datasheet'):
+                    self.url = comp['datasheet']
+                if comp.has_key('comment'):
+                    self.libRef = self.value
+                    self.value = comp['comment']
+            else:
+                print "fail to find ", self.netKey, " in net list"
+        
     def Output(self, out = None):
         refs = ''
         for r in self.refs:
            refs += r + ','
         if not out:
             out = csv.writer(sys.stdout, lineterminator='\n', delimiter=',', quotechar='\"', quoting=csv.QUOTE_ALL)
-        out.writerow([self.value, 'Desc', refs, self.fp, 'LibRef', str(self.pincount), str(len(self.refs))])
+        out.writerow([self.value, self.desc, refs, self.fp, self.libRef, str(self.pincount), str(len(self.refs)), self.partNumber, self.url ])
     def AddRef(self, ref):
         self.refs.append(ref)
 
 def OutputBOMHeader(out = None):
     if not out:
         out = csv.writer(sys.stdout, lineterminator='\n', delimiter=',', quotechar='\"', quoting=csv.QUOTE_ALL)
-    out.writerow(['Comment','Description','Designator','Footprint','LibRef','Pins','Quantity','\xb1\xe0\xba\xc5'])
+    out.writerow(['Comment','Description','Designator','Footprint','LibRef','Pins','Quantity','\xb1\xe0\xba\xc5','url'])
 
 def IsModExclude(mod, ExcludeRefs = [], ExcludeValues = []):
     r = mod.GetReference()
@@ -334,7 +359,7 @@ def IsModExclude(mod, ExcludeRefs = [], ExcludeValues = []):
             return True
     return False
     
-def GenBOM(brd = None, layer = pcbnew.F_Cu, type = 1, ExcludeRefs = [], ExcludeValues = []):
+def GenBOM(brd = None, layer = pcbnew.F_Cu, type = 1, ExcludeRefs = [], ExcludeValues = [], netList = None):
     if not brd:
         brd = pcbnew.GetBoard()
     bomList = {}
@@ -350,7 +375,7 @@ def GenBOM(brd = None, layer = pcbnew.F_Cu, type = 1, ExcludeRefs = [], ExcludeV
             if bomList.has_key(vf):
                 bomList[vf].AddRef(r)
             else:
-                bomList[vf] = BOMItem(r,f,v, mod.GetPadCount())
+                bomList[vf] = BOMItem(r,f,v, mod.GetPadCount(), netList)
     print 'there are ', len(bomList), ' items at layer ', layer
     return sorted(bomList.values(), key = lambda item: item.refs[0])
 
@@ -482,15 +507,16 @@ def GenMFDoc(SplitTopAndBottom = False, ExcludeRef = [], ExcludeValue = [], brd 
     path = os.path.split(fName)[0]
     fName = os.path.split(fName)[1]
     bomName = fName.rsplit('.',1)[0]
+    netList = loadnet.loadNet(brd)
     
     excludeRefs = PreCompilePattenList(ExcludeRef)
     excludeValues = PreCompilePattenList(ExcludeValue)
 
-    bomSMDTop = GenBOM(brd, pcbnew.F_Cu, 1, excludeRefs, excludeValues)
-    bomHoleTop = GenBOM(brd, pcbnew.F_Cu, 0, excludeRefs, excludeValues)
+    bomSMDTop = GenBOM(brd, pcbnew.F_Cu, 1, excludeRefs, excludeValues, netList)
+    bomHoleTop = GenBOM(brd, pcbnew.F_Cu, 0, excludeRefs, excludeValues, netList)
     
-    bomSMDBot = GenBOM(brd, pcbnew.B_Cu, 1, excludeRefs, excludeValues)
-    bomHoleBot = GenBOM(brd, pcbnew.B_Cu, 0, excludeRefs, excludeValues)
+    bomSMDBot = GenBOM(brd, pcbnew.B_Cu, 1, excludeRefs, excludeValues, netList)
+    bomHoleBot = GenBOM(brd, pcbnew.B_Cu, 0, excludeRefs, excludeValues, netList)
     
     posSMDTop = GenPos(brd, pcbnew.F_Cu, 1, excludeRefs, excludeValues)
     posHoleTop = GenPos(brd, pcbnew.F_Cu, 0, excludeRefs, excludeValues)
