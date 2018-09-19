@@ -310,8 +310,8 @@ class BOMItem:
         self.value = value
         self.pincount = pincount
         kv = value
-        if kv.rfind('[') != -1:
-            kv = kv[0:kv.rfind('[')]
+        #if kv.rfind('[') != -1:
+        #    kv = kv[0:kv.rfind('[')]
         
         self.netKey = kv + "&" + footprint
         self.partNumber = ""

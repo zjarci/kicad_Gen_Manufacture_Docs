@@ -79,7 +79,7 @@ import re
 from string import whitespace
 import functools
 
-BRACKETS = {'(': ')', '[': ']'}
+BRACKETS = {'(': ')'}#, '[': ']'}
 
 
 ### Python 3 compatibility
