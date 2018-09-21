@@ -346,7 +346,7 @@ class BOMItem:
 def OutputBOMHeader(out = None):
     if not out:
         out = csv.writer(sys.stdout, lineterminator='\n', delimiter=',', quotechar='\"', quoting=csv.QUOTE_ALL)
-    out.writerow(['Comment','Description','Designator','Footprint','LibRef','Pins','Quantity','\xb1\xe0\xba\xc5','url'])
+    out.writerow(['Comment','Description','Designator','Footprint','LibRef','Pins','Quantity','PartNumber','url'])
 
 def IsModExclude(mod, ExcludeRefs = [], ExcludeValues = []):
     r = mod.GetReference()

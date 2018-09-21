@@ -11,8 +11,8 @@ def loadNet(brd = None):
 
 def toStr(v):
     if type(v) == str :
-        return v
-    return v.value()
+        return unicode(v)
+    return unicode(v.value())
     
 def parseComp(comp):
     r = {}
