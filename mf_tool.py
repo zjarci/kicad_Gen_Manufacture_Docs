@@ -617,6 +617,8 @@ def version():
     print "1.1"
 
 def GenSMTFiles():
+    reload(sys)
+    sys.setdefaultencoding("utf8")
     GenMFDoc()
     gd.GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "gerber/")
     
