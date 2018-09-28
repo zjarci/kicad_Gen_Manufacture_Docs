@@ -8,7 +8,7 @@ S-Expression parse tool is forked from https://github.com/tkf/sexpdata
 
 使用方法:
 
-1 复制mf_tool.py和gerber_drill.py到"[KiCad安装目录]\share\kicad\scripting\plugins" 路径下
+1 复制mf_tool.py gerber_drill.py loadnet.py	sexpdata.py 这四个文件到"[KiCad安装目录]\share\kicad\scripting\plugins" 路径下
 
 2 在KiCAD的Python命令行窗口中键入下列命令：
 
