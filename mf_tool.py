@@ -7,6 +7,7 @@ import sys
 import os
 import gerber_drill as gd
 import wx
+import io
 import loadnet
 
 class RefBuilder:
@@ -314,6 +315,8 @@ class BOMItem:
         #    kv = kv[0:kv.rfind('[')]
         
         self.netKey = kv + "&" + footprint
+        if not isinstance(self.netKey, unicode):
+            self.netKey = unicode(self.netKey)
         self.partNumber = ""
         self.desc = "desc"
         self.url = ""
@@ -479,15 +482,31 @@ def MirrorItemTo(boardItem, x, y):
     newBI.MoveToMM(x, y)
     newBI.Mirror()
     return newBI
+
+class UnicodeWriter:
+    def __init__(self, file, *a, **kw):
+        self.file = file
+    def writerow(self, data):
+        for e in data:
+            self.file.write(u'"')
+            #print isinstance(e, unicode)
+            if not isinstance(e, unicode):
+                self.file.write(unicode(e))
+            else:
+                self.file.write(e)
+            self.file.write(u'",')
+        self.file.write(u'\n')
     
+
 def OpenCSV(fileName):
     try:
-        f = open(fileName, 'w+')
+        f = io.open(fileName, 'w+', encoding="utf-8")
     except IOError:
         e = "Can't open output file for writing: " + fileName
         print( __file__, ":", e, sys.stderr )
         f = sys.stdout
-    out = csv.writer( f, lineterminator='\n', delimiter=',', quotechar='\"', quoting=csv.QUOTE_MINIMAL )
+    #out = csv.writer( f, lineterminator='\n', delimiter=',', quotechar='\"', quoting=csv.QUOTE_MINIMAL )
+    out = UnicodeWriter(f)
     return out
 
 def PreCompilePattenList(pattenList):
@@ -617,8 +636,8 @@ def version():
     print "1.1"
 
 def GenSMTFiles():
-    reload(sys)
-    sys.setdefaultencoding("utf8")
+    #reload(sys)
+    #sys.setdefaultencoding("utf8")
     GenMFDoc()
     gd.GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "gerber/")
     

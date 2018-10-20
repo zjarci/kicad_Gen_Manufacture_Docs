@@ -10,11 +10,11 @@ def loadNet(brd = None):
     return loadNetFile(name)
 
 def toStr(v):
-    if type(v) == str :
+    if isinstance(v, sexp.Symbol):
+        return v.value()
+    if not isinstance(v, unicode):
         return unicode(v)
-    if type(v) == int:
-        return unicode(v)
-    return unicode(v.value())
+    return v
     
 def parseComp(comp):
     r = {}
@@ -47,7 +47,7 @@ def parseComp(comp):
     return r
     
 def loadNetFile(fileName):
-    f = io.open(fileName, "rb")
+    f = io.open(fileName, "r", encoding="utf-8")
     nets = sexp.loads(f.read())
     if nets[3][0].value() != "components":
         return None
