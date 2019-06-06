@@ -26,7 +26,7 @@ import re
 import math
 
 from pcbnew import *
-def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/"):
+def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReference = True):
 	if not board:
 		board = GetBoard()
 
@@ -48,6 +48,7 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/"):
 	popt.SetExcludeEdgeLayer(True);
 	popt.SetScale(1)
 	popt.SetUseAuxOrigin(False)
+	popt.SetPlotReference(plotReference)
 
 	# This by gerbers only (also the name is truly horrid!)
 	popt.SetSubtractMaskFromSilk(False)
