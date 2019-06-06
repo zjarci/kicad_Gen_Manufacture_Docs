@@ -19,6 +19,8 @@ mf.GenSMTFiles()
 
 3. 或者在[工具]->[外部工具]下执行Gen Manufacture Docs命令。
 
+![desc](desc.png)
+
 4 BOM文件和位置文件会以CSV格式存放在电路板相同目录下，gerber和钻孔文件放在电路板目录下的gerber目录中。通过此方法生成的钻孔文件中的槽孔会被转换成多个普通孔。
 
 ## 注意:

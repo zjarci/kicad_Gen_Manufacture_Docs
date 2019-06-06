@@ -735,7 +735,7 @@ class gen_mf_doc( pcbnew.ActionPlugin ):
 
     def Run( self ):
         tt = MFDialog()
-        tt.ShowModal()
+        tt.Show()
         
 gen_mf_doc().register()
     
