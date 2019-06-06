@@ -1,6 +1,7 @@
 import sexpdata as sexp
 import pcbnew as pn
 import io
+import traceback
 
 def loadNet(brd = None):
     if not brd:
@@ -47,17 +48,22 @@ def parseComp(comp):
     return r
     
 def loadNetFile(fileName):
-    f = io.open(fileName, "r", encoding="utf-8")
-    nets = sexp.loads(f.read())
-    if nets[3][0].value() != "components":
+    try:
+        f = io.open(fileName, "r", encoding="utf-8")
+        nets = sexp.loads(f.read())
+        if nets[3][0].value() != "components":
+            return None
+        comps = nets[3]
+        r = {}
+        for i in range(1, len(comps)):
+            comp = comps[i]
+            c = parseComp(comp)
+            r[c['value'] + "&" + c['footprint']] = c
+        return r
+    except Exception as e:
+        print "Fail to load netlist:"
+        traceback.print_exc()
         return None
-    comps = nets[3]
-    r = {}
-    for i in range(1, len(comps)):
-        comp = comps[i]
-        c = parseComp(comp)
-        r[c['value'] + "&" + c['footprint']] = c
-    return r
             
             
             

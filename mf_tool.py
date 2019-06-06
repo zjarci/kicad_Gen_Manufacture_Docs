@@ -9,6 +9,7 @@ import gerber_drill as gd
 import wx
 import io
 import loadnet
+import traceback
 
 class RefBuilder:
     ''' RefBuilder use to re-build the module referrence number
@@ -291,7 +292,7 @@ def GetPad1(mod):
             padx = pad
         if pad.GetPadName() == '1':
             return pad
-    print 'Pad 1 not found, use the first pad instead'
+    #print 'Pad 1 not found, use the first pad instead'
     return padx
 def IsSMD(mod):
     for pad in mod.Pads():
@@ -514,14 +515,23 @@ def PreCompilePattenList(pattenList):
     for pat in pattenList:
         res.append(re.compile(pat))
     return res
+
+def def_logger(*args):
+    r = ""
+    for t in args:
+        r = r + str(t) + " "
+    print r
+
     
-def GenMFDoc(SplitTopAndBottom = False, ExcludeRef = [], ExcludeValue = [], brd = None):
+def GenMFDoc(SplitTopAndBottom = False, ExcludeRef = [], ExcludeValue = [], brd = None, needGenBOM = True, needGenPos = True, logger = def_logger):
     if not brd:
         brd = pcbnew.GetBoard()
+    if not needGenBOM and not needGenPos:
+        return
     bound = GetBoardBound(brd)
     org_pt = pcbnew.wxPoint( bound.GetLeft(), bound.GetBottom())
     brd.SetAuxOrigin(org_pt)
-    print "set board aux origin to left bottom point, at", org_pt
+    logger("set board aux origin to left bottom point, at", org_pt)
     fName = brd.GetFileName()
     path = os.path.split(fName)[0]
     fName = os.path.split(fName)[1]
@@ -547,89 +557,93 @@ def GenMFDoc(SplitTopAndBottom = False, ExcludeRef = [], ExcludeValue = [], brd 
         fName = bomName
         bomName = path + '/' + fName + '_BOM_TOP.csv'
         posName = path + '/' + fName + '_POS_TOP.csv'
-        # Generate BOM for Top layer
-        print 'Genertate BOM file ', bomName
-        csv = OpenCSV(bomName)
-        OutputBOMHeader(csv)
-        for v in bomSMDTop:
-           v.Output(csv)
-        if len(bomHoleTop)>0:
-            csv.writerow(['Through Hole Items '])
-            for v in bomHoleTop:
-                v.Output(csv)
-        
-        # Generate POS for Top layer
-        print 'Genertate POS file ', posName
-        csv = OpenCSV(posName)
-        OutputPosHeader(csv)
-        for v in posSMDTop:
-           v.Output(csv)
-        if len(posHoleTop)>0:
-            csv.writerow(['Through Hole Items '])
-            for v in posHoleTop:
+        if needGenBOM:
+            # Generate BOM for Top layer
+            logger('Genertate BOM file ', bomName)
+            csv = OpenCSV(bomName)
+            OutputBOMHeader(csv)
+            for v in bomSMDTop:
                v.Output(csv)
+            if len(bomHoleTop)>0:
+                csv.writerow(['Through Hole Items '])
+                for v in bomHoleTop:
+                    v.Output(csv)
+        if needGenPos:
+            # Generate POS for Top layer
+            logger('Genertate POS file ', posName)
+            csv = OpenCSV(posName)
+            OutputPosHeader(csv)
+            for v in posSMDTop:
+               v.Output(csv)
+            if len(posHoleTop)>0:
+                csv.writerow(['Through Hole Items '])
+                for v in posHoleTop:
+                   v.Output(csv)
            
         bomName = path + '/' + fName + '_BOM_BOT.csv'
         posName = path + '/' + fName + '_POS_BOT.csv'
-        # Generate BOM for Bottom layer
-        print 'Genertate BOM file ', bomName
-        csv = OpenCSV(bomName)
-        OutputBOMHeader(csv)
-        for  v in bomSMDBot:
-           v.Output(csv)
-        if len(bomHoleBot)>0:
-            csv.writerow(['Through Hole Items '])
-            for v in bomHoleBot:
+        if needGenBOM:
+            # Generate BOM for Bottom layer
+            logger('Genertate BOM file ', bomName)
+            csv = OpenCSV(bomName)
+            OutputBOMHeader(csv)
+            for  v in bomSMDBot:
                v.Output(csv)
-        # Generate POS for Bottom layer   
-        print 'Genertate POS file ', posName
-        csv = OpenCSV(posName)
-        OutputPosHeader(csv)        
-        for v in posSMDBot:
-           v.Output(csv)
-        if len(posHoleBot)>0:
-            csv.writerow(['Through Hole Items '])
-            for v in posHoleBot:
+            if len(bomHoleBot)>0:
+                csv.writerow(['Through Hole Items '])
+                for v in bomHoleBot:
+                   v.Output(csv)
+        if needGenPos:
+            # Generate POS for Bottom layer   
+            logger('Genertate POS file ', posName)
+            csv = OpenCSV(posName)
+            OutputPosHeader(csv)        
+            for v in posSMDBot:
                v.Output(csv)
+            if len(posHoleBot)>0:
+                csv.writerow(['Through Hole Items '])
+                for v in posHoleBot:
+                   v.Output(csv)
         
     else:
         posName = path + '/' + bomName + '_POS.csv'
         bomName = path + '/' + bomName + '_BOM.csv'
         # Generate BOM for both layer
-        print 'Genertate BOM file ', bomName
-        csv = OpenCSV(bomName)
-        OutputBOMHeader(csv)
-        for v in bomSMDTop:
-           v.Output(csv)
-           
-        for  v in bomSMDBot:
-           v.Output(csv)
-        if len(bomHoleTop)+len(bomHoleBot)>0:
-            csv.writerow(['Through Hole Items '])
-            for v in bomHoleTop:
+        if needGenBOM:
+            logger('Genertate BOM file ', bomName)
+            csv = OpenCSV(bomName)
+            OutputBOMHeader(csv)
+            for v in bomSMDTop:
                v.Output(csv)
                
-            for v in bomHoleBot:
+            for  v in bomSMDBot:
                v.Output(csv)
+            if len(bomHoleTop)+len(bomHoleBot)>0:
+                csv.writerow(['Through Hole Items '])
+                for v in bomHoleTop:
+                   v.Output(csv)
+                   
+                for v in bomHoleBot:
+                   v.Output(csv)
         
+        if needGenPos:
+            # Generate POS for both layer
+            logger('Genertate POS file ', posName)
         
-        # Generate POS for both layer
-        print 'Genertate POS file ', posName
-    
-        csv = OpenCSV(posName)
-        OutputPosHeader(csv)
-        for v in posSMDTop:
-           v.Output(csv)
-           
-        for v in posSMDBot:
-           v.Output(csv)
-        if len(posHoleTop)+len(posHoleBot)>0:
-            csv.writerow(['Through Hole Items '])
-            for v in posHoleTop:
+            csv = OpenCSV(posName)
+            OutputPosHeader(csv)
+            for v in posSMDTop:
                v.Output(csv)
                
-            for v in posHoleBot:
+            for v in posSMDBot:
                v.Output(csv)
+            if len(posHoleTop)+len(posHoleBot)>0:
+                csv.writerow(['Through Hole Items '])
+                for v in posHoleTop:
+                   v.Output(csv)
+                   
+                for v in posHoleBot:
+                   v.Output(csv)
     return bomName, posName
     
 def version():
@@ -640,7 +654,60 @@ def GenSMTFiles():
     #sys.setdefaultencoding("utf8")
     GenMFDoc()
     gd.GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "gerber/")
+
     
+    
+    
+    
+    
+class MFDialog(wx.Dialog):
+    def __init__(self):
+        wx.Dialog.__init__(self, None, -1, 'Generate Manufacture docs', size=(800, 430))
+
+        self.chkBOM = wx.CheckBox(self, label = "BOM List", pos = (15, 10))
+        self.chkPos = wx.CheckBox(self, label = "Positon File ", pos = (15, 30))
+        self.chkGerber = wx.CheckBox(self, label = "Gerber Files", pos = (15, 50))
+        self.chkBOM.SetValue(True)
+        self.chkPos.SetValue(True)
+        self.chkGerber.SetValue(True)
+
+        self.static_text = wx.StaticText(self, -1, 'Log:', style=wx.ALIGN_CENTER, pos = (15, 70))
+        self.area_text = wx.TextCtrl(self, -1, '', size=(770, 300), pos = (15, 90),
+                                     style=(wx.TE_MULTILINE | wx.TE_AUTO_SCROLL | wx.TE_DONTWRAP| wx.TE_READONLY))
+
+        self.btnGen = wx.Button(self, label = "Generate Manufacture Docs", pos=(200, 30))
+        self.Bind(wx.EVT_BUTTON, self.Onclick, self.btnGen)
+        
+        self.btnClearLog = wx.Button(self, label = "Clear Log", pos=(500, 30))
+        self.Bind(wx.EVT_BUTTON, self.ClearLog, self.btnClearLog)
+        
+        
+
+        #okButton = wx.Button(self, wx.ID_OK, "OK", pos=(15, 100))
+        #okButton.SetDefault()
+        #cancelButton = wx.Button(self, wx.ID_CANCEL, "Cancel", pos=(200, 150))
+    def log(self, *args):
+        for v in args:
+            self.area_text.AppendText(str(v) + " ")
+        self.area_text.AppendText("\n")
+    def ClearLog(self, e):
+        self.area_text.SetValue("")
+    def Onclick(self, e):
+        try:
+            if self.chkBOM.GetValue():
+                self.area_text.AppendText("Start generate BOM list\n")
+            if self.chkPos.GetValue():
+                self.area_text.AppendText("Start generate position file\n")
+            GenMFDoc(needGenBOM = self.chkBOM.GetValue(), needGenPos = self.chkPos.GetValue(), logger = lambda *args: self.log(*args) )
+            if self.chkGerber.GetValue():
+                self.area_text.AppendText("Start generate gerber files\n")
+                gerberPath = gd.GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "gerber/")
+                self.area_text.AppendText( 'Gerber file dir is "%s"' % gerberPath)
+        except Exception as e:
+            self.area_text.AppendText("Error:\n")
+            self.area_text.AppendText(traceback.format_exc())
+    
+
 class gen_mf_doc( pcbnew.ActionPlugin ):
     """
     gen_mf_doc: A plugin used to generate BOM and position file
@@ -665,15 +732,9 @@ class gen_mf_doc( pcbnew.ActionPlugin ):
         self.description = "Automatically generate manufacture document, Gerber, Drill, BOM, Position"
 
     def Run( self ):
-        bomName, posName = GenMFDoc()
-        gerberPath = gd.GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "gerber/")
-        msg = 'BOM file is "%s"\n' % bomName
-        msg = msg + 'Position file is "%s"\n' % posName
-        msg = msg + 'Gerber file dir is "%s"' % gerberPath
-        wx.MessageBox(msg)
+        tt = MFDialog()
+        tt.ShowModal()
         
-
-
 gen_mf_doc().register()
     
     
