@@ -24,11 +24,19 @@ import sys
 import os
 import re
 import math
+import zipfile as zf
 
 from pcbnew import *
-def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReference = True):
+def def_logger(*args):
+    r = ""
+    for t in args:
+        r = r + str(t) + " "
+    print r
+def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReference = True, logger = def_logger):
 	if not board:
 		board = GetBoard()
+
+	plotFiles = []
 
 	pctl = PLOT_CONTROLLER(board)
 
@@ -74,9 +82,9 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReferen
 	for layer_info in plot_plan:
 		pctl.SetLayer(layer_info[1])
 		pctl.OpenPlotfile(layer_info[0], PLOT_FORMAT_GERBER, layer_info[2])
-		print 'plot %s' % pctl.GetPlotFileName()
+		logger('plot %s' % pctl.GetPlotFileName())
 		if pctl.PlotLayer() == False:
-			print "plot error"
+			logger("plot error")
 
 	#generate internal copper layers, if any
 	lyrcnt = board.GetCopperLayerCount();
@@ -85,9 +93,9 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReferen
 		pctl.SetLayer(innerlyr)
 		lyrname = 'inner%s' % innerlyr
 		pctl.OpenPlotfile(lyrname, PLOT_FORMAT_GERBER, "inner")
-		print 'plot %s' % pctl.GetPlotFileName()
+		logger('plot %s' % pctl.GetPlotFileName())
 		if pctl.PlotLayer() == False:
-			print "plot error"
+			logger("plot error")
 
 
 	# At the end you have to close the last plot, otherwise you don't know when
@@ -112,8 +120,8 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReferen
 
 	genDrl = True
 	genMap = False
-	print 'create drill and map files in %s' % pctl.GetPlotDirName()
-	drlwriter.CreateDrillandMapFilesSet( pctl.GetPlotDirName(), genDrl, genMap );
+	logger('create drill and map files in %s' % pctl.GetPlotDirName())
+	drlwriter.CreateDrillandMapFilesSet( pctl.GetPlotDirName(), genDrl, genMap )
 
 	# One can create a text file to report drill statistics
 	#rptfn = pctl.GetPlotDirName() + 'drill_report.rpt'
@@ -122,6 +130,25 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReferen
 	
 	if split_G85:
 		SplitG85InDrill(pctl.GetPlotDirName(), False, split_G85)
+
+	files = [f for f in os.listdir(pctl.GetPlotDirName()) if f.endswith('.gbr')]
+	for f in files:
+		plotFiles.append( pctl.GetPlotDirName() + f )
+
+	files = [f for f in os.listdir(pctl.GetPlotDirName()) if f.endswith('.drl')]
+	for f in files:
+		plotFiles.append( pctl.GetPlotDirName() + f )
+
+	brdName = board.GetFileName()
+	brdName = brdName[brdName.rfind(os.path.sep)+1: brdName.rfind('.')]
+	zipName = pctl.GetPlotDirName() + brdName + "_gerber.zip"
+	logger("Zip them into " + zipName)
+
+	azip = zf.ZipFile(zipName, 'w')
+	for f in plotFiles:
+		azip.write(filename=f, arcname = os.path.split(f)[1] , compress_type=zf.ZIP_DEFLATED)
+	azip.close()
+
 	return pctl.GetPlotDirName()
 
 def FromGerberPosition(position_str):

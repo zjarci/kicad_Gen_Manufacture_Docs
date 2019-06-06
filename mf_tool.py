@@ -703,7 +703,7 @@ class MFDialog(wx.Dialog):
             GenMFDoc(needGenBOM = self.chkBOM.GetValue(), needGenPos = self.chkPos.GetValue(), logger = lambda *args: self.log(*args) )
             if self.chkGerber.GetValue():
                 self.area_text.AppendText("Start generate gerber files\n")
-                gerberPath = gd.GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "gerber/", plotReference = self.chkPlotRef.GetValue())
+                gerberPath = gd.GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "gerber/", plotReference = self.chkPlotRef.GetValue(), logger = lambda *args: self.log(*args))
                 self.area_text.AppendText( 'Gerber file dir is "%s"' % gerberPath)
         except Exception as e:
             self.area_text.AppendText("Error:\n")
