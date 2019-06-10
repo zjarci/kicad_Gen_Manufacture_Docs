@@ -129,7 +129,8 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReferen
 	#drlwriter.GenDrillReportFile( rptfn );
 	
 	if split_G85:
-		SplitG85InDrill(pctl.GetPlotDirName(), False, split_G85)
+		logger("Split the slot into holes")
+		SplitSlotInDrill(pctl.GetPlotDirName(), False, split_G85)
 
 	files = [f for f in os.listdir(pctl.GetPlotDirName()) if f.endswith('.gbr')]
 	for f in files:
@@ -140,7 +141,10 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReferen
 		plotFiles.append( pctl.GetPlotDirName() + f )
 
 	brdName = board.GetFileName()
-	brdName = brdName[brdName.rfind(os.path.sep)+1: brdName.rfind('.')]
+	s = os.path.split(brdName)
+	brdName = s[1]
+	brdName = brdName[0:brdName.rfind('.')]
+	logger("Board Name:", brdName)
 	zipName = pctl.GetPlotDirName() + brdName + "_gerber.zip"
 	logger("Zip them into " + zipName)
 
@@ -161,7 +165,30 @@ def FromGerberPosition(position_str):
 
 def same(p1,p2,diff = 0.0001):
 	return (abs(p1[0]-p2[0])<diff) and (abs(p1[1]-p2[1])<diff)
-	
+
+def SplitSlot(p1, p2, step = 0.2):
+	r = []
+	dx = p2[0] - p1[0]
+	dy = p2[1] - p1[1]
+	dist = sqrt(dx*dx+dy*dy)
+	td = 0
+	pt = [p1[0],p1[1]]
+	count = 0
+	while not same(pt,p2):
+		r.append('X%sY%s\n' %(str(float('%.3f'%pt[0])),str(float('%.3f'%pt[1]))))
+		pt[0] = pt[0] + step*dx/dist
+		pt[1] = pt[1] + step*dy/dist
+		if dist - td < (step*1.5):
+			pt[0] = p2[0]
+			pt[1] = p2[1]
+		else:
+			td = td + step
+		count = count + 1
+		if count > 50:
+			break
+	r.append('X%sY%s\n' %(str(float('%.3f'%pt[0])),str(float('%.3f'%pt[1]))))
+	return r
+
 def SplitG85(G85Data,step = 0.2):
 	t = G85Data.split('G85')
 	r = []
@@ -187,9 +214,9 @@ def SplitG85(G85Data,step = 0.2):
 			if count > 50:
 				break
 		r.append('X%sY%s\n' %(str(float('%.3f'%pt[0])),str(float('%.3f'%pt[1]))))
-		return r, True
+		return r
 	else:
-		return [G85Data], False
+		return None
 
 def HoleSize(line):
 	r = re.compile('(T[0-9]+)C([-0-9.]+)')
@@ -206,9 +233,21 @@ def round(value, round = 0.1):
 	t = math.ceil(t)
 	return t * round
 
-def SplitG85InDrill(drillPath, newfilename = True,step = 0.2):
-	''' Split the G85 command to hole seqence in drill file
-	'''
+def isG05(line):
+	return line.find('G05') == 0
+
+def isG00(line):
+	return line.find('G00') == 0
+def isG01(line):
+	return line.find('G01') == 0
+def isM15(line):
+	return line.find('M15') == 0
+def isM16(line):
+	return line.find('M16') == 0
+
+
+
+def SplitSlotInDrill(drillPath, newfilename = True,step = 0.2):
 	files = [f for f in os.listdir(drillPath) if f.endswith('.drl')]
 	for fn in files:
 		infn = drillPath + fn
@@ -219,6 +258,9 @@ def SplitG85InDrill(drillPath, newfilename = True,step = 0.2):
 				skip_G05 = False
 				holes = {}
 				curHolesSize = None
+				slot_mode = False
+				hole_begin = None
+				hole_end = None
 				for line in ins:
 					hn,hs = HoleSize(line)
 					if hn and hs:
@@ -228,17 +270,39 @@ def SplitG85InDrill(drillPath, newfilename = True,step = 0.2):
 					step = 0.2
 					if curHolesSize:
 						step = round(curHolesSize/3)
-					r, nextSkip = SplitG85(line, step)
-					if skip_G05 and (r[0].find('G05') == 0):
-						skip_G05 = False
+					r = SplitG85(line, step)
+					if not r:
+						if isG00(line):
+							slot_mode = True
+							hole_begin = FromGerberPosition(line)
+					if not slot_mode:
+						if r:
+							skip_G05 = True
+							for l in r:
+								outline.append(l)
+						else:
+							if skip_G05 and isG05(line):
+								skip_G05 = False
+							else:
+								outline.append(line)
 					else:
-						skip_G05 = nextSkip
-						for l in r:
-							outline.append(l)
+						if isG01(line):
+							hole_end = FromGerberPosition(line)
+						if isG05(line):
+							slot_mode = False
+							if hole_begin and hole_end:
+								r = SplitSlot(hole_begin, hole_end, step)
+								for l in r:
+									outline.append(l)
+							else:
+								logger("Slot hole format error")
+							hole_begin = None
+							hole_end = None
 				ins.close()
 				if newfilename:
 					outfn = infn.replace(".drl", "_no_slot.drl")
 				fo = open(outfn, "w+")
 				fo.writelines(outline)
 				fo.close()
+
 	

@@ -49,3 +49,11 @@ step 4: the BOM and Postion CSV file will be generated under the same folder of 
 ## Attention:
 
 The GenMFDoc() command will change the Aux original point
+
+## Preivew
+
+
+![holes_with_ref](holes_with_ref.png)
+
+
+![slot_without_ref](slot_without_ref.png)

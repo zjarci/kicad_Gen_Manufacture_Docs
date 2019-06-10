@@ -668,16 +668,18 @@ class MFDialog(wx.Dialog):
         self.chkPos = wx.CheckBox(self, label = "Positon File ", pos = (15, 30))
         self.chkGerber = wx.CheckBox(self, label = "Gerber Files", pos = (15, 50))
         self.chkPlotRef = wx.CheckBox(self, label = "Plot Reference", pos = (130, 50))
+        self.chkSplitSlot = wx.CheckBox(self, label = "Split Slot", pos = (280, 50))
         self.chkBOM.SetValue(True)
         self.chkPos.SetValue(True)
         self.chkGerber.SetValue(True)
         self.chkPlotRef.SetValue(True)
+        self.chkSplitSlot.SetValue(True)
 
         self.static_text = wx.StaticText(self, -1, 'Log:', style=wx.ALIGN_CENTER, pos = (15, 70))
         self.area_text = wx.TextCtrl(self, -1, '', size=(770, 300), pos = (15, 90),
                                      style=(wx.TE_MULTILINE | wx.TE_AUTO_SCROLL | wx.TE_DONTWRAP| wx.TE_READONLY))
 
-        self.btnGen = wx.Button(self, label = "Generate Manufacture Docs", pos=(300, 30))
+        self.btnGen = wx.Button(self, label = "Generate Manufacture Docs", pos=(400, 30))
         self.Bind(wx.EVT_BUTTON, self.Onclick, self.btnGen)
         
         self.btnClearLog = wx.Button(self, label = "Clear Log", pos=(700, 30))
@@ -703,7 +705,15 @@ class MFDialog(wx.Dialog):
             GenMFDoc(needGenBOM = self.chkBOM.GetValue(), needGenPos = self.chkPos.GetValue(), logger = lambda *args: self.log(*args) )
             if self.chkGerber.GetValue():
                 self.area_text.AppendText("Start generate gerber files\n")
-                gerberPath = gd.GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "gerber/", plotReference = self.chkPlotRef.GetValue(), logger = lambda *args: self.log(*args))
+                split_slot = None
+                if self.chkSplitSlot.GetValue():
+                    split_slot = 0.2
+                gerberPath = gd.GenGerberDrill(
+                    board = None,
+                    split_G85 = split_slot,
+                    plotDir = "gerber/",
+                    plotReference = self.chkPlotRef.GetValue(),
+                    logger = lambda *args: self.log(*args))
                 self.area_text.AppendText( 'Gerber file dir is "%s"' % gerberPath)
         except Exception as e:
             self.area_text.AppendText("Error:\n")
