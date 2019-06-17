@@ -34,7 +34,7 @@ GenMFDoc() 会改变电路板的钻孔原点。建议先用GenMFDoc()生成BOM�
 
 Usage:
 
-step 1: Copy the mf_tool.py and gerber_drill.py to “[kicad install path]\share\kicad\scripting\plugins”
+step 1: Copy the mf_tool.py gerber_drill.py loadnet.py and sexpdata.pyto “[kicad install path]\share\kicad\scripting\plugins”
 
 step 2: In Python console window, type 
 ```python
@@ -44,7 +44,7 @@ mf.GenSMTFiles()
 
 step 3: or in [tools]->[external tools] menu, invoke the [Gen Manufacture Docs] command.
 
-step 4: the BOM and Postion CSV file will be generated under the same folder of the board file。 Gerber and drill file is under the "gerber" folder. The slot hole in drill file will split to hole serires.
+step 4: the BOM and Postion CSV file will be generated under the same folder of the board file。 Gerber and drill file is under the "gerber" folder. The slot hole in drill file will split to hole serires. Send them to jlcpcb.com to get a PCBA.
 
 ## Attention:
 
