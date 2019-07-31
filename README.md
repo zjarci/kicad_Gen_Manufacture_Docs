@@ -2,9 +2,6 @@
 # KiCad EDA 生产文件生成器
 
 
-
-[TOC]
-
 ## 中文说明
 
 本插件可一键生成 PCB 的 Gerber、钻孔、BOM 物料清单、坐标文件。
@@ -32,7 +29,7 @@
 
 当 `BOM List` `Positon File` `Gerber Files` 全选时，点击 `Generate Marnufacture Docs` 按钮后插件会一键生成 BOM 物料清单、坐标文件、Gerber 文件、钻孔文件。
 
-BOM 文件和坐标文件会以 CSV 格式存放在电路板同级目录下，Gerber 和钻孔文件放在电路板目录下的 gerber 目录中，通过 `Split Slot` 此选项生成的钻孔文件中的槽孔会被转换成多个普通孔。
+BOM 文件和坐标文件会以 CSV 格式存放在电路板同级目录下，Gerber 和钻孔文件放在电路板目录下的 gerber 目录中，通过 `Split Slot` 选项生成的钻孔文件中的槽孔会被转换成多个普通孔。
 
 生成的文件可以直接在 sz-jlc.com 进行贴装。
 
