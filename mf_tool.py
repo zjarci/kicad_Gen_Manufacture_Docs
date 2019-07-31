@@ -740,7 +740,7 @@ class gen_mf_doc( pcbnew.ActionPlugin ):
           of the plugin
         """
         self.name = "Gen Manufacture Docs"
-        #self.category = "Modify PCB"
+        self.category = "Modify PCB"
         self.description = "Automatically generate manufacture document, Gerber, Drill, BOM, Position"
 
     def Run( self ):
