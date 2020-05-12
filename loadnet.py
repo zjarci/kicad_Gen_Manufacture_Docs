@@ -1,4 +1,4 @@
-import sexpdata as sexp
+import kisexp as sexp
 import pcbnew as pn
 import io
 import traceback
@@ -11,19 +11,15 @@ def loadNet(brd = None):
     return loadNetFile(name)
 
 def toStr(v):
-    if isinstance(v, sexp.Symbol):
-        return v.value()
-    if not isinstance(v, unicode):
-        return unicode(v)
     return v
     
 def parseComp(comp):
     r = {}
-    if comp[0].value() != "comp":
+    if comp[0] != "comp":
         print "Parse comp error"
         return None
     for i in range(1, len(comp)):
-        key = comp[i][0].value()
+        key = comp[i][0]
         if key == "value":
             r['value'] = toStr(comp[i][1])
         if key == "footprint":
@@ -49,9 +45,8 @@ def parseComp(comp):
     
 def loadNetFile(fileName):
     try:
-        f = io.open(fileName, "r", encoding="utf-8")
-        nets = sexp.loads(f.read())
-        if nets[3][0].value() != "components":
+        nets = sexp.loadKicadNet(fileName)
+        if nets[3][0] != "components":
             return None
         comps = nets[3]
         r = {}
