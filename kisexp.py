@@ -81,8 +81,3 @@ def loadKicadNet(filename):
     data = file.read()
     res = parseSexp(data)
     return res[0][0]
-    
-
-loadKicadNet("D:\\work\\xtools\\usb_pv\\handware\\hw.net")
-
-#print(parseSexp("(12 34 (56 78) 90)"))
