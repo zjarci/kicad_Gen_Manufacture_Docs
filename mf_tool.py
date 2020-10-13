@@ -692,7 +692,14 @@ class MFDialog(wx.Dialog):
         #cancelButton = wx.Button(self, wx.ID_CANCEL, "Cancel", pos=(200, 150))
     def log(self, *args):
         for v in args:
-            self.area_text.AppendText(str(v) + " ")
+            try:
+                self.area_text.AppendText(str(v) + " ")
+            except Exception as e:
+                try:
+                    self.area_text.AppendText(v + " ")
+                except Exception as e1:
+                    self.area_text.AppendText("\nError:\nfail to log content ")
+                    self.area_text.AppendText(traceback.format_exc())
         self.area_text.AppendText("\n")
     def ClearLog(self, e):
         self.area_text.SetValue("")
