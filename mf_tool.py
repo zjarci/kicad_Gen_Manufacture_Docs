@@ -11,6 +11,25 @@ import io
 import loadnet
 import traceback
 
+import re
+patten = re.compile(r'\d+')
+def ref_comp(x):
+    if type(x) == unicode:
+        x = x.encode('gbk')
+    if type(x) == str:
+        t = patten.findall(x)
+        if len(t)>0:
+            hh = x.replace(t[0],'')
+            vv = '0'*(6-len(hh)) + hh  + '0'*(6-len(t[0])) + t[0]
+            return vv
+        else:
+			print(t)
+    else:
+		print(type(x))
+    return x
+def ref_sorted(iterable, key = None):
+	return sorted(iterable, key = ref_comp)
+	
 class RefBuilder:
     ''' RefBuilder use to re-build the module referrence number
     Step 1:  use rb = RefBuilder() to create a RefBuilder object
@@ -339,13 +358,14 @@ class BOMItem:
         
     def Output(self, out = None):
         refs = ''
-        for r in self.refs:
+        for r in ref_sorted(self.refs):
            refs += r + ','
         if not out:
             out = csv.writer(sys.stdout, lineterminator='\n', delimiter=',', quotechar='\"', quoting=csv.QUOTE_ALL)
         out.writerow([self.value, self.desc, refs, self.fp, self.libRef, str(self.pincount), str(len(self.refs)), self.partNumber, self.url ])
     def AddRef(self, ref):
         self.refs.append(ref)
+        self.refs = ref_sorted(self.refs)
 
 def OutputBOMHeader(out = None):
     if not out:
@@ -381,7 +401,7 @@ def GenBOM(brd = None, layer = pcbnew.F_Cu, type = 1, ExcludeRefs = [], ExcludeV
             else:
                 bomList[vf] = BOMItem(r,f,v, mod.GetPadCount(), netList)
     print 'there are ', len(bomList), ' items at layer ', layer
-    return sorted(bomList.values(), key = lambda item: item.refs[0])
+    return sorted(bomList.values(), key = lambda item: ref_comp(item.refs[0]))
 
 def layerName(layerId):
     if layerId == pcbnew.F_Cu:
@@ -428,7 +448,7 @@ def GenPos(brd = None, layer = pcbnew.F_Cu, type = 1, ExcludeRefs = [], ExcludeV
             needOutput = IsSMD(mod) == (type == 1)
         if needOutput:
             posList.append(POSItem(mod, pt_org.x, pt_org.y))
-    posList = sorted(posList, key = lambda item: item.ref)
+    posList = sorted(posList, key = lambda item: ref_comp(item.ref))
     return posList
 def OutputPosHeader(out = None):
     if not out:
@@ -675,9 +695,12 @@ class MFDialog(wx.Dialog):
         self.chkPlotRef.SetValue(True)
         self.chkSplitSlot.SetValue(True)
 
-        self.static_text = wx.StaticText(self, -1, 'Log:', style=wx.ALIGN_CENTER, pos = (15, 70))
-        self.area_text = wx.TextCtrl(self, -1, '', size=(770, 300), pos = (15, 90),
+        self.static_text = wx.StaticText(self, -1, 'Log:', style=wx.ALIGN_CENTER, pos = (15, 90))
+        self.area_text = wx.TextCtrl(self, -1, '', size=(770, 300), pos = (15, 110),
                                      style=(wx.TE_MULTILINE | wx.TE_AUTO_SCROLL | wx.TE_DONTWRAP| wx.TE_READONLY))
+        
+        self.static_text1 = wx.StaticText(self, -1, 'Exclude Refs:', style=wx.ALIGN_CENTER, pos = (15, 70))
+        self.exclude_ref_text = wx.TextCtrl(self, -1, '', size=(670, 25), pos = (100, 70))
 
         self.btnGen = wx.Button(self, label = "Generate Manufacture Docs", pos=(400, 30))
         self.Bind(wx.EVT_BUTTON, self.Onclick, self.btnGen)
