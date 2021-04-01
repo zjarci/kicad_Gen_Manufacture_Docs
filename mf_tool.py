@@ -29,6 +29,39 @@ def ref_comp(x):
     return x
 def ref_sorted(iterable, key = None):
 	return sorted(iterable, key = ref_comp)
+
+def GetExcludeRefs():
+    f = pcbnew.GetBoard().GetFileName()
+    delimer = '/'
+    pos = f.rfind('/')
+    if pos < 0:
+        delimer = '\\'
+        pos = f.rfind('\\')
+    f = f[0:pos] + delimer + "exclude.txt"
+    if os.path.exists(f):
+        file = io.open(f, "r")
+        return file.read()
+    return ""
+
+class ExcludeRefClass:
+    def __init__(self, refs):
+        self.refNames = {}
+        self.refPrefix = {}
+        xx = re.findall(r'([A-Za-z]+[0-9]+)', refs.upper())
+        for v in xx:
+            self.refNames[v] = True
+        xx = re.findall(r'([A-Za-z]+)\*', refs.upper())
+        for v in xx:
+            self.refPrefix[v] = True
+    def contains(self, ref):
+        if self.refNames.get(ref.upper()):
+            return True
+        xx = re.findall(r'[A-Za-z_]+', ref)
+        if len(xx) > 0:
+            return self.refPrefix.get(xx[0].upper())
+        return False
+
+unusedRef = None
 	
 class RefBuilder:
     ''' RefBuilder use to re-build the module referrence number
@@ -382,14 +415,21 @@ def IsModExclude(mod, ExcludeRefs = [], ExcludeValues = []):
         if pat.match(v):
             return True
     return False
-    
+
+removedRefs = {}
 def GenBOM(brd = None, layer = pcbnew.F_Cu, type = 1, ExcludeRefs = [], ExcludeValues = [], netList = None):
     if not brd:
         brd = pcbnew.GetBoard()
     bomList = {}
     for mod in brd.GetModules():
         needOutput = False
-        if (mod.GetLayer() == layer) and (not IsModExclude(mod, ExcludeRefs, ExcludeValues)):
+        needRemove = False
+        if unusedRef:
+            needRemove = unusedRef.contains(mod.GetReference())
+        if needRemove:
+            global removedRefs
+            removedRefs[mod.GetReference()] = True
+        if (mod.GetLayer() == layer) and (not IsModExclude(mod, ExcludeRefs, ExcludeValues) and (not needRemove)):
             needOutput = IsSMD(mod) == (type == 1)
         if needOutput:
             v = mod.GetValue()
@@ -708,7 +748,8 @@ class MFDialog(wx.Dialog):
         self.btnClearLog = wx.Button(self, label = "Clear Log", pos=(700, 30))
         self.Bind(wx.EVT_BUTTON, self.ClearLog, self.btnClearLog)
         
-        
+        self.exclude_ref_text.Clear()
+        self.exclude_ref_text.AppendText(GetExcludeRefs())
 
         #okButton = wx.Button(self, wx.ID_OK, "OK", pos=(15, 100))
         #okButton.SetDefault()
@@ -732,7 +773,12 @@ class MFDialog(wx.Dialog):
                 self.area_text.AppendText("Start generate BOM list\n")
             if self.chkPos.GetValue():
                 self.area_text.AppendText("Start generate position file\n")
+            global unusedRef
+            unusedRef = ExcludeRefClass(self.exclude_ref_text.GetValue())
+            global removedRefs
+            removedRefs = {}
             GenMFDoc(needGenBOM = self.chkBOM.GetValue(), needGenPos = self.chkPos.GetValue(), logger = lambda *args: self.log(*args) )
+            self.area_text.AppendText("Removed refs in BOM: " + ",".join(ref_sorted(removedRefs.keys())) + "\n")
             if self.chkGerber.GetValue():
                 self.area_text.AppendText("Start generate gerber files\n")
                 split_slot = None
@@ -770,8 +816,10 @@ class gen_mf_doc( pcbnew.ActionPlugin ):
           of the plugin
         """
         self.name = "Gen Manufacture Docs"
-        self.category = "Modify PCB"
+        #self.category = "Modify PCB"
         self.description = "Automatically generate manufacture document, Gerber, Drill, BOM, Position"
+        self.icon_file_name = os.path.join(os.path.dirname(__file__), "./mf_tool.png")
+        self.show_toolbar_button = True
 
     def Run( self ):
         tt = MFDialog()
