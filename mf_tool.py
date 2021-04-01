@@ -736,7 +736,7 @@ class MFDialog(wx.Dialog):
         self.chkSplitSlot.SetValue(True)
 
         self.static_text = wx.StaticText(self, -1, 'Log:', style=wx.ALIGN_CENTER, pos = (15, 90))
-        self.area_text = wx.TextCtrl(self, -1, '', size=(770, 300), pos = (15, 110),
+        self.area_text = wx.TextCtrl(self, -1, '', size=(770, 280), pos = (15, 110),
                                      style=(wx.TE_MULTILINE | wx.TE_AUTO_SCROLL | wx.TE_DONTWRAP| wx.TE_READONLY))
         
         self.static_text1 = wx.StaticText(self, -1, 'Exclude Refs:', style=wx.ALIGN_CENTER, pos = (15, 70))
