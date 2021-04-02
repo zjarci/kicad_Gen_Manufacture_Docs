@@ -428,7 +428,7 @@ def GenBOM(brd = None, layer = pcbnew.F_Cu, type = 1, ExcludeRefs = [], ExcludeV
             needRemove = unusedRef.contains(mod.GetReference())
         if needRemove:
             global removedRefs
-            removedRefs[mod.GetReference()] = True
+            removedRefs[mod.GetReference()] = mod.GetValue()
         if (mod.GetLayer() == layer) and (not IsModExclude(mod, ExcludeRefs, ExcludeValues) and (not needRemove)):
             needOutput = IsSMD(mod) == (type == 1)
         if needOutput:
@@ -733,7 +733,7 @@ class MFDialog(wx.Dialog):
         self.chkPos.SetValue(True)
         self.chkGerber.SetValue(True)
         self.chkPlotRef.SetValue(True)
-        self.chkSplitSlot.SetValue(True)
+        self.chkSplitSlot.SetValue(False)
 
         self.static_text = wx.StaticText(self, -1, 'Log:', style=wx.ALIGN_CENTER, pos = (15, 90))
         self.area_text = wx.TextCtrl(self, -1, '', size=(770, 280), pos = (15, 110),
@@ -778,7 +778,10 @@ class MFDialog(wx.Dialog):
             global removedRefs
             removedRefs = {}
             GenMFDoc(needGenBOM = self.chkBOM.GetValue(), needGenPos = self.chkPos.GetValue(), logger = lambda *args: self.log(*args) )
-            self.area_text.AppendText("Removed refs in BOM: " + ",".join(ref_sorted(removedRefs.keys())) + "\n")
+            #self.area_text.AppendText("Removed refs in BOM: " + ",".join(ref_sorted(removedRefs.keys())) + "\n")
+            self.area_text.AppendText("Removed refs in BOM:\n")
+            for n in ref_sorted(removedRefs.keys()):
+                self.area_text.AppendText(n+":" + removedRefs[n] + "\n")
             if self.chkGerber.GetValue():
                 self.area_text.AppendText("Start generate gerber files\n")
                 split_slot = None
