@@ -55,7 +55,7 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReferen
 	popt.SetUseGerberProtelExtensions(False)
 	popt.SetExcludeEdgeLayer(True);
 	popt.SetScale(1)
-	popt.SetUseAuxOrigin(False)
+	popt.SetUseAuxOrigin(True)
 	popt.SetPlotReference(plotReference)
 
 	# This by gerbers only (also the name is truly horrid!)
@@ -109,7 +109,8 @@ def GenGerberDrill(board = None, split_G85 = 0.2, plotDir = "plot/", plotReferen
 
 	mirror = False
 	minimalHeader = False
-	offset = wxPoint(0,0)
+	# offset = wxPoint(0,0)
+	offset = board.GetAuxOrigin()
 	# False to generate 2 separate drill files (one for plated holes, one for non plated holes)
 	# True to generate only one drill file
 	mergeNPTH = False
