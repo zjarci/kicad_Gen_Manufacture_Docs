@@ -588,9 +588,7 @@ def GenMFDoc(SplitTopAndBottom = False, ExcludeRef = [], ExcludeValue = [], brd 
         brd = pcbnew.GetBoard()
     if not needGenBOM and not needGenPos:
         return
-    bound = GetBoardBound(brd)
-    org_pt = pcbnew.wxPoint( bound.GetLeft(), bound.GetBottom())
-    brd.SetAuxOrigin(org_pt)
+    org_pt = brd.GetAuxOrigin()
     logger("set board aux origin to left bottom point, at", org_pt)
     fName = brd.GetFileName()
     path = os.path.split(fName)[0]
@@ -750,7 +748,7 @@ class MFDialog(wx.Dialog):
         
         self.exclude_ref_text.Clear()
         self.exclude_ref_text.AppendText(GetExcludeRefs())
-
+        self.Bind(wx.EVT_CLOSE, self.onCloseWindow)
         #okButton = wx.Button(self, wx.ID_OK, "OK", pos=(15, 100))
         #okButton.SetDefault()
         #cancelButton = wx.Button(self, wx.ID_CANCEL, "Cancel", pos=(200, 150))
@@ -797,7 +795,8 @@ class MFDialog(wx.Dialog):
         except Exception as e:
             self.area_text.AppendText("Error:\n")
             self.area_text.AppendText(traceback.format_exc())
-    
+    def onCloseWindow(self, event):
+        self.Destroy()
 
 class gen_mf_doc( pcbnew.ActionPlugin ):
     """
